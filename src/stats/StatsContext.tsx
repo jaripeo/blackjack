@@ -44,7 +44,7 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     AsyncStorage.getItem(LIFETIME_STATS_KEY)
-      .then(raw => { if (raw) setLifetime(JSON.parse(raw) as LifetimeStats); })
+      .then(raw => { if (raw) setLifetime({ ...INITIAL_LIFETIME_STATS, ...JSON.parse(raw) }); })
       .catch(() => {});
   }, []);
 
