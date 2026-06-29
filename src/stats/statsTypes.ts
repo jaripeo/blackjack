@@ -41,3 +41,4 @@ export const INITIAL_LIFETIME_STATS: LifetimeStats = {
 };
 
 export const LIFETIME_STATS_KEY = 'blackjack_lifetime_stats';
+export const ROUND_HISTORY_KEY  = 'blackjack_round_history';

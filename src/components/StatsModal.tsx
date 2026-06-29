@@ -10,6 +10,7 @@ import {
 import { useGame } from '../controller/GameContext';
 import { useStats } from '../stats/StatsContext';
 import { theme } from '../theme/theme';
+import { NetChart } from './NetChart';
 
 interface Props {
   visible: boolean;
@@ -38,7 +39,7 @@ const Row: React.FC<{ label: string; value: string; accent?: string }> = ({
 
 export const StatsModal: React.FC<Props> = ({ visible, onClose }) => {
   const { state } = useGame();
-  const { stats, lifetime, resetStats, resetLifetime } = useStats();
+  const { stats, lifetime, roundHistory, resetStats, resetLifetime } = useStats();
 
   const currentBankroll = state.players[0].bankroll;
   const net = currentBankroll - stats.sessionStartBankroll;
@@ -62,6 +63,8 @@ export const StatsModal: React.FC<Props> = ({ visible, onClose }) => {
           >
             {/* ── ALL TIME ─────────────────────────────── */}
             <Text style={s.sectionTitle}>All Time</Text>
+
+            <NetChart history={roundHistory} />
 
             <Row label="Hands Played" value={String(lifetime.totalHands)} />
             <Row
