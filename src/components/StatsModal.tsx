@@ -38,11 +38,12 @@ const Row: React.FC<{ label: string; value: string; accent?: string }> = ({
 
 export const StatsModal: React.FC<Props> = ({ visible, onClose }) => {
   const { state } = useGame();
-  const { stats, resetStats } = useStats();
+  const { stats, lifetime, resetStats, resetLifetime } = useStats();
 
   const currentBankroll = state.players[0].bankroll;
   const net = currentBankroll - stats.sessionStartBankroll;
-  const totalDecisive = stats.wins + stats.losses + stats.pushes;
+  const sessionDecisive = stats.wins + stats.losses + stats.pushes;
+  const lifetimeDecisive = lifetime.totalWins + lifetime.totalLosses + lifetime.totalPushes;
 
   return (
     <Modal
@@ -52,29 +53,64 @@ export const StatsModal: React.FC<Props> = ({ visible, onClose }) => {
       onRequestClose={onClose}
     >
       <Pressable style={s.backdrop} onPress={onClose}>
-        {/* inner Pressable stops taps on the sheet from closing */}
         <Pressable style={s.sheet}>
           <View style={s.handle} />
-          <Text style={s.title}>Session Stats</Text>
 
           <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={s.scroll}
           >
-            <Row label="Hands Played" value={String(stats.handsPlayed)} />
+            {/* ── ALL TIME ─────────────────────────────── */}
+            <Text style={s.sectionTitle}>All Time</Text>
+
+            <Row label="Hands Played" value={String(lifetime.totalHands)} />
             <Row
               label="Wins"
-              value={`${stats.wins}  (${pct(stats.wins, totalDecisive)})`}
+              value={`${lifetime.totalWins}  (${pct(lifetime.totalWins, lifetimeDecisive)})`}
               accent={theme.colors.success}
             />
             <Row
               label="Losses"
-              value={`${stats.losses}  (${pct(stats.losses, totalDecisive)})`}
+              value={`${lifetime.totalLosses}  (${pct(lifetime.totalLosses, lifetimeDecisive)})`}
               accent={theme.colors.danger}
             />
             <Row
               label="Pushes"
-              value={`${stats.pushes}  (${pct(stats.pushes, totalDecisive)})`}
+              value={`${lifetime.totalPushes}  (${pct(lifetime.totalPushes, lifetimeDecisive)})`}
+              accent={theme.colors.push}
+            />
+            <Row
+              label="Natural Blackjacks"
+              value={String(lifetime.totalBlackjacks)}
+              accent={theme.colors.gold}
+            />
+
+            <Pressable
+              onPress={() => resetLifetime()}
+              style={s.resetAllTimeBtn}
+            >
+              <Text style={s.resetAllTimeText}>Reset all-time stats</Text>
+            </Pressable>
+
+            <View style={s.divider} />
+
+            {/* ── THIS SESSION ─────────────────────────── */}
+            <Text style={s.sectionTitle}>This Session</Text>
+
+            <Row label="Hands Played" value={String(stats.handsPlayed)} />
+            <Row
+              label="Wins"
+              value={`${stats.wins}  (${pct(stats.wins, sessionDecisive)})`}
+              accent={theme.colors.success}
+            />
+            <Row
+              label="Losses"
+              value={`${stats.losses}  (${pct(stats.losses, sessionDecisive)})`}
+              accent={theme.colors.danger}
+            />
+            <Row
+              label="Pushes"
+              value={`${stats.pushes}  (${pct(stats.pushes, sessionDecisive)})`}
               accent={theme.colors.push}
             />
             <Row
@@ -113,7 +149,7 @@ export const StatsModal: React.FC<Props> = ({ visible, onClose }) => {
                 onClose();
               }}
             >
-              <Text style={s.resetText}>Reset</Text>
+              <Text style={s.resetText}>Reset Session</Text>
             </Pressable>
             <Pressable style={s.closeBtn} onPress={onClose}>
               <Text style={s.closeText}>Done</Text>
@@ -159,17 +195,30 @@ const s = StyleSheet.create({
     alignSelf: 'center',
     marginBottom: theme.spacing(2),
   },
-  title: {
-    color: theme.colors.text,
-    fontSize: 20,
-    fontWeight: '900',
-    marginBottom: theme.spacing(1.5),
+  sectionTitle: {
+    color: theme.colors.gold,
+    fontSize: 13,
+    fontWeight: '800',
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    marginBottom: theme.spacing(0.5),
   },
   scroll: { paddingBottom: theme.spacing(1) },
   divider: {
     height: 1,
     backgroundColor: 'rgba(255,255,255,0.08)',
-    marginVertical: theme.spacing(1),
+    marginVertical: theme.spacing(1.5),
+  },
+  resetAllTimeBtn: {
+    alignSelf: 'flex-start',
+    marginTop: theme.spacing(0.5),
+    marginBottom: theme.spacing(0.5),
+  },
+  resetAllTimeText: {
+    color: theme.colors.danger,
+    fontSize: 12,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
   },
   actions: {
     flexDirection: 'row',

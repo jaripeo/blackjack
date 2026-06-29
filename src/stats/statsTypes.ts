@@ -17,3 +17,21 @@ export const INITIAL_STATS: GameStats = {
   peakBankroll: 1000,
   sessionStartBankroll: 1000,
 };
+
+export interface LifetimeStats {
+  totalHands: number;
+  totalWins: number;
+  totalLosses: number;
+  totalPushes: number;
+  totalBlackjacks: number;
+}
+
+export const INITIAL_LIFETIME_STATS: LifetimeStats = {
+  totalHands: 0,
+  totalWins: 0,
+  totalLosses: 0,
+  totalPushes: 0,
+  totalBlackjacks: 0,
+};
+
+export const LIFETIME_STATS_KEY = 'blackjack_lifetime_stats';

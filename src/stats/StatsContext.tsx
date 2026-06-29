@@ -6,13 +6,22 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { GameStats, INITIAL_STATS } from './statsTypes';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  GameStats,
+  LifetimeStats,
+  INITIAL_STATS,
+  INITIAL_LIFETIME_STATS,
+  LIFETIME_STATS_KEY,
+} from './statsTypes';
 import { useGame } from '../controller/GameContext';
 import { RULES } from '../engine/rules';
 
 interface StatsContextValue {
   stats: GameStats;
+  lifetime: LifetimeStats;
   resetStats: () => void;
+  resetLifetime: () => void;
 }
 
 const StatsContext = createContext<StatsContextValue | null>(null);
@@ -30,9 +39,14 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const { state } = useGame();
   const [stats, setStats] = useState<GameStats>(makeInitialStats);
-  // Track the last roundId we've already accounted for so we don't double-count
-  // if the component re-renders while phase is still 'round-over'.
+  const [lifetime, setLifetime] = useState<LifetimeStats>(INITIAL_LIFETIME_STATS);
   const lastRoundId = useRef<number>(-1);
+
+  useEffect(() => {
+    AsyncStorage.getItem(LIFETIME_STATS_KEY)
+      .then(raw => { if (raw) setLifetime(JSON.parse(raw) as LifetimeStats); })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (state.phase !== 'round-over') return;
@@ -60,12 +74,29 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({
       blackjacks:  prev.blackjacks + blackjacks,
       peakBankroll: Math.max(prev.peakBankroll, player.bankroll),
     }));
+
+    setLifetime(prev => {
+      const next: LifetimeStats = {
+        totalHands:      prev.totalHands      + player.hands.length,
+        totalWins:       prev.totalWins       + wins,
+        totalLosses:     prev.totalLosses     + losses,
+        totalPushes:     prev.totalPushes     + pushes,
+        totalBlackjacks: prev.totalBlackjacks + blackjacks,
+      };
+      AsyncStorage.setItem(LIFETIME_STATS_KEY, JSON.stringify(next)).catch(() => {});
+      return next;
+    });
   }, [state.phase, state.roundId]);
 
   const resetStats = useCallback(() => setStats(makeInitialStats()), []);
 
+  const resetLifetime = useCallback(() => {
+    setLifetime(INITIAL_LIFETIME_STATS);
+    AsyncStorage.removeItem(LIFETIME_STATS_KEY).catch(() => {});
+  }, []);
+
   return (
-    <StatsContext.Provider value={{ stats, resetStats }}>
+    <StatsContext.Provider value={{ stats, lifetime, resetStats, resetLifetime }}>
       {children}
     </StatsContext.Provider>
   );
