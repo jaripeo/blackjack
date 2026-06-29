@@ -85,6 +85,32 @@ export const StatsModal: React.FC<Props> = ({ visible, onClose }) => {
               accent={theme.colors.gold}
             />
 
+            <View style={s.divider} />
+
+            <Row
+              label="Total Wagered"
+              value={`$${lifetime.totalAmountWagered.toLocaleString()}`}
+            />
+            <Row
+              label="Total Won"
+              value={`+$${lifetime.totalAmountWon.toLocaleString()}`}
+              accent={theme.colors.success}
+            />
+            <Row
+              label="Total Lost"
+              value={`-$${lifetime.totalAmountLost.toLocaleString()}`}
+              accent={theme.colors.danger}
+            />
+            <Row
+              label="Net"
+              value={signed(lifetime.totalAmountWon - lifetime.totalAmountLost)}
+              accent={
+                lifetime.totalAmountWon >= lifetime.totalAmountLost
+                  ? theme.colors.success
+                  : theme.colors.danger
+              }
+            />
+
             <Pressable
               onPress={() => resetLifetime()}
               style={s.resetAllTimeBtn}

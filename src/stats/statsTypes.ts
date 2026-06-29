@@ -24,6 +24,9 @@ export interface LifetimeStats {
   totalLosses: number;
   totalPushes: number;
   totalBlackjacks: number;
+  totalAmountWon: number;
+  totalAmountLost: number;
+  totalAmountWagered: number;
 }
 
 export const INITIAL_LIFETIME_STATS: LifetimeStats = {
@@ -32,6 +35,9 @@ export const INITIAL_LIFETIME_STATS: LifetimeStats = {
   totalLosses: 0,
   totalPushes: 0,
   totalBlackjacks: 0,
+  totalAmountWon: 0,
+  totalAmountLost: 0,
+  totalAmountWagered: 0,
 };
 
 export const LIFETIME_STATS_KEY = 'blackjack_lifetime_stats';

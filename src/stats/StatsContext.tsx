@@ -55,13 +55,29 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const player = state.players[0];
     let wins = 0, losses = 0, pushes = 0, blackjacks = 0;
+    let amountWon = 0, amountLost = 0, amountWagered = 0;
 
     for (const hand of player.hands) {
       switch (hand.result) {
-        case 'blackjack': wins++; blackjacks++; break;
-        case 'win':       wins++;               break;
-        case 'lose':      losses++;             break;
-        case 'push':      pushes++;             break;
+        case 'blackjack':
+          wins++; blackjacks++;
+          amountWon += Math.floor(hand.bet * RULES.blackjackPayout);
+          amountWagered += hand.bet;
+          break;
+        case 'win':
+          wins++;
+          amountWon += hand.bet;
+          amountWagered += hand.bet;
+          break;
+        case 'lose':
+          losses++;
+          amountLost += hand.bet;
+          amountWagered += hand.bet;
+          break;
+        case 'push':
+          pushes++;
+          amountWagered += hand.bet;
+          break;
       }
     }
 
@@ -77,11 +93,14 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({
 
     setLifetime(prev => {
       const next: LifetimeStats = {
-        totalHands:      prev.totalHands      + player.hands.length,
-        totalWins:       prev.totalWins       + wins,
-        totalLosses:     prev.totalLosses     + losses,
-        totalPushes:     prev.totalPushes     + pushes,
-        totalBlackjacks: prev.totalBlackjacks + blackjacks,
+        totalHands:          prev.totalHands          + player.hands.length,
+        totalWins:           prev.totalWins           + wins,
+        totalLosses:         prev.totalLosses         + losses,
+        totalPushes:         prev.totalPushes         + pushes,
+        totalBlackjacks:     prev.totalBlackjacks     + blackjacks,
+        totalAmountWon:      prev.totalAmountWon      + amountWon,
+        totalAmountLost:     prev.totalAmountLost     + amountLost,
+        totalAmountWagered:  prev.totalAmountWagered  + amountWagered,
       };
       AsyncStorage.setItem(LIFETIME_STATS_KEY, JSON.stringify(next)).catch(() => {});
       return next;
